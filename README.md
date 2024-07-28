@@ -1,1 +1,1 @@
-# CPP
+# Continual Panoptic Perception
