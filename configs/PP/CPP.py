@@ -15,7 +15,6 @@ palette = [(220, 20, 60), (119, 11, 32), (0, 0, 142), (0, 0, 230), (106, 0, 228)
            (182, 182, 255), (0, 82, 0), (120, 166, 157), 
            (80, 79, 81), (80, 190, 255), (200, 200, 180), (240, 200, 100), (240, 50, 30)]
 
-
 metainfo = {'classes':classes,'thing_classes':thing_classes,'stuff_classes':stuff_classes,'palatte':palette}
 backend_args = None
 
@@ -56,7 +55,7 @@ model = dict(
         init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
     panoptic_head=dict(
         type='MaskFormerCaptionHeadV7',
-        in_channels=[256, 512, 1024, 2048],  # pass to pixel_decoder inside
+        in_channels=[256, 512, 1024, 2048],
         feat_channels=256,
         out_channels=256,
         num_things_classes=num_things_classes,
@@ -66,10 +65,10 @@ model = dict(
             type='TransformerEncoderPixelDecoder',
             norm_cfg=dict(type='GN', num_groups=32),
             act_cfg=dict(type='ReLU'),
-            encoder=dict(  # DetrTransformerEncoder
+            encoder=dict(  
                 num_layers=6,
-                layer_cfg=dict(  # DetrTransformerEncoderLayer
-                    self_attn_cfg=dict(  # MultiheadAttention
+                layer_cfg=dict( 
+                    self_attn_cfg=dict(  
                         embed_dims=256,
                         num_heads=8,
                         dropout=0.1,
@@ -83,15 +82,15 @@ model = dict(
             positional_encoding=dict(num_feats=128, normalize=True)),
         enforce_decoder_input_project=False,
         positional_encoding=dict(num_feats=128, normalize=True),
-        transformer_decoder=dict(  # DetrTransformerDecoder
+        transformer_decoder=dict( 
             num_layers=6,
-            layer_cfg=dict(  # DetrTransformerDecoderLayer
-                self_attn_cfg=dict(  # MultiheadAttention
+            layer_cfg=dict(  
+                self_attn_cfg=dict( 
                     embed_dims=256,
                     num_heads=8,
                     dropout=0.1,
                     batch_first=True),
-                cross_attn_cfg=dict(  # MultiheadAttention
+                cross_attn_cfg=dict(  
                     embed_dims=256,
                     num_heads=8,
                     dropout=0.1,
@@ -147,25 +146,18 @@ model = dict(
                 dict(type='ClassificationCost', weight=1.0),
                 dict(type='FocalLossCost', weight=20.0, binary_input=True),
                 dict(type='DiceCost', weight=1.0, pred_act=True, eps=1.0),
-                # dict(type='SeasawLossCost', weight=1.0),
             ]),
         sampler=dict(type='MaskPseudoSampler')),
     test_cfg=dict(
         panoptic_on=True,
-        # For now, the dataset does not support
-        # evaluating semantic segmentation metric.
         semantic_on=False,
         instance_on=False,
-        # max_per_image is for instance segmentation.
         max_per_image=100,
         object_mask_thr=0.8,
         iou_thr=0.8,
-        # In MaskFormer's panoptic postprocessing,
-        # it will not filter masks whose score is smaller than 0.5 .
         filter_low_score=False),
     init_cfg=None)
 
-# dataset settings
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -179,7 +171,6 @@ train_pipeline = [
         ),
     dict(type='Resize', scale=(1333, 800), keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
- 
     dict(type='PackDetInputs')
 ]
 
@@ -196,7 +187,6 @@ test_pipeline = [
         meta_keys=('img_id', 'img_path', 'ori_shape', 'img_shape',
                    'scale_factor'))
 ]
-
 
 train_dataloader = dict(
     batch_size=2,
@@ -241,7 +231,6 @@ val_evaluator = dict(
     backend_args=backend_args)
 test_evaluator = val_evaluator
 
-# optimizer
 optim_wrapper = dict(
     type='OptimWrapper',
     optimizer=dict(
@@ -259,25 +248,17 @@ optim_wrapper = dict(
     clip_grad=dict(max_norm=0.01, norm_type=2))
 
 max_epochs = 90
-
-# learning rate
 param_scheduler = dict(
     type='MultiStepLR',
     begin=0,
     end=max_epochs,
     by_epoch=True,
-    milestones=[50], # decline lr at milestones
+    milestones=[50],
     gamma=0.1)
 
 train_cfg = dict(
     type='EpochBasedTrainLoop', max_epochs=max_epochs, val_interval=10)
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
-
-# Default setting for scaling LR automatically
-#   - `enable` means enable scaling LR automatically
-#       or not by default.
-#   - `base_batch_size` = (16 GPUs) x (1 samples per GPU).
 auto_scale_lr = dict(enable=False, base_batch_size=16)
-# load_from = 'pretrained/maskformer_r50_ms-16xb1-75e_coco.pth' # base step
-load_from = 'work_dirs/maskformer_r50_caption_single_scale_v7_incre/epoch_90-15-2-step4-overlapped.pth' # initilized with last step model
+load_from = 'pretrained/maskformer_r50_ms-16xb1-75e_coco.pth'
