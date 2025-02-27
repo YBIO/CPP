@@ -221,9 +221,9 @@ train_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         metainfo=metainfo,
-        ann_file='incremental/panoptic_mar20_final_train_A1_A15.json',
+        ann_file='incremental/Train_panoptic.json',
         data_prefix=dict(
-            img='JPEGImages/', seg='annotations/panoptic_mar20_final_train/'),
+            img='JPEGImages/', seg='annotations/Train_panoptic/'),
         filter_cfg=dict(filter_empty_gt=True, min_size=32),
         pipeline=train_pipeline,
         backend_args=backend_args))
@@ -238,8 +238,8 @@ val_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         metainfo=metainfo,
-        ann_file='annotations/panoptic_mar20_final_val.json',
-        data_prefix=dict(img='JPEGImages/', seg='annotations/panoptic_mar20_final_val'),
+        ann_file='annotations/Train_panoptic.json',
+        data_prefix=dict(img='JPEGImages/', seg='annotations/Val_panoptic'),
         test_mode=True,
         pipeline=test_pipeline,
         backend_args=backend_args))
